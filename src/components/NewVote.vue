@@ -1,7 +1,8 @@
 <template>
-  <div>
-    <b-button block variant="primary" v-on:click="newVote()">New Vote</b-button>
-    <b-container fluid>
+  <div class="border rounded d-flex m-2 p-2 flex-column">
+    <p class="text-left font-weight-bold m-2">Create a new vote here: </p>
+    <b-button class="m-2" variant="primary" v-on:click="newVote()">New Vote</b-button>
+    <b-container class="m-2" fluid>
       <b-row>
         <b-col sm="3">
           Authority Account
@@ -21,7 +22,7 @@
           {{ vote.authAddr }}
         </b-col>
         <b-col sm="2">
-          {{ shorten(vote.txID) }}
+          {{ shortHex(vote.txID) }}
         </b-col>
         <b-col sm="1">
           {{ vote.status }}
@@ -39,7 +40,7 @@ import { Component, Vue } from "vue-property-decorator";
 
 import { getABI } from "myvetools/dist/utils";
 import { encodeABI } from "myvetools/dist/connexUtils";
-import { abiVoteCreator, addrVoteCreator } from "../common";
+import { abiVoteCreator, addrVoteCreator, shortHex } from "../common";
 
 @Component
 export default class ListVotes extends Vue {
@@ -54,13 +55,6 @@ export default class ListVotes extends Vue {
     txID: string;
     status: "success" | "reverted";
   }[] = [];
-
-  private shorten(h: string): string {
-    if (h.length <= 10) {
-      return h;
-    }
-    return h.slice(0, 6) + "..." + h.slice(h.length - 4);
-  }
 
   private async newVote() {
     const signingService = connex.vendor.sign("tx");
@@ -90,6 +84,11 @@ export default class ListVotes extends Vue {
   public async created() {
     const ticker = connex.thor.ticker();
     for (;;) {
+      // Loop that checks all the unconfirmed txs
+      // If reverted, remove txid from unconfirmed_txids
+      // If success, 
+      // 1. remove txid from auth.unconfirmed_txids, and
+      // 2. add a new vote to votes
       for (let i in this.auths) {
         for (let txid of this.auths[i].unconfirmed_txids) {
           const receipt = await connex.thor.transaction(txid).getReceipt();
@@ -100,7 +99,6 @@ export default class ListVotes extends Vue {
             this.auths[i].unconfirmed_txids.splice(p, 1);
 
             if (receipt.reverted) {
-              // alert(`tx: ${txid} reve  rted!`);
               this.votes.push({
                 authAddr: this.auths[i].address,
                 voteID: "",
@@ -114,7 +112,6 @@ export default class ListVotes extends Vue {
                 txID: txid,
                 status: "success",
               });
-              // alert("Confirmed txid " + txid);
             }
           }
         }
