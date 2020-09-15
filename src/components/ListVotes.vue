@@ -1,14 +1,9 @@
 <template>
   <div class="border rounded d-flex m-2 p-2 flex-column">
-    <p class="text-left font-weight-bold m-2">List all the votes created by: </p>
-    <b-form-group class="m-2"
-      id="auth-address"
-      label="Enter authority account address"
-      label-for="input-1"
-      :state="state"
-    >
-      <b-form-input id="input-1" v-model="address" @keyup.enter="getVoteIDs()" :state="state" trim></b-form-input>
-    </b-form-group>
+    <h3 class="text-left font-weight-bold m-2">List all the votes created by</h3>
+    <b-input-group class="m-2" prepend="Authority Account">
+      <b-form-input class="mr-3" v-model="address" @keyup.enter="getVoteIDs()" :state="state" trim></b-form-input>
+    </b-input-group>
 
     <b-container class="m-2" fluid>
       <b-row>

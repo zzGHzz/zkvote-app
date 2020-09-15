@@ -1,6 +1,6 @@
 <template>
   <div class="border rounded d-flex m-2 p-2 flex-column">
-    <p class="text-left font-weight-bold m-2">Create a new vote here: </p>
+    <h3 class="text-left font-weight-bold m-2">Create a new vote </h3>
     <b-button class="m-2" variant="primary" v-on:click="newVote()">New Vote</b-button>
     <b-container class="m-2" fluid>
       <b-row>
