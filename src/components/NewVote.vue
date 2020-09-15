@@ -9,8 +9,8 @@
         <b-col sm="1">Status</b-col>
         <b-col sm="5">Vote ID</b-col>
       </b-row>
-      <b-row v-for="vote in votes" :key="vote.txid">
-        <b-col sm="3">{{ vote.authAddr }}</b-col>
+      <b-row v-for="vote in votes" :key="vote.txID">
+        <b-col sm="3">{{ vote.signer }}</b-col>
         <b-col sm="2">{{ shortHex(vote.txID) }}</b-col>
         <b-col sm="1">{{ vote.status }}</b-col>
         <b-col sm="5">{{ vote.voteID }}</b-col>
@@ -36,7 +36,7 @@ export default class NewVote extends Vue {
   private txs: Set<{ signer: string; txid: string }> = new Set();
 
   private votes: {
-    authAddr: string;
+    signer: string;
     voteID: string;
     txID: string;
     status: "success" | "reverted";
@@ -77,14 +77,14 @@ export default class NewVote extends Vue {
           this.txs.delete(tx);
           if (receipt.reverted) {
             this.votes.push({
-              authAddr: tx.signer,
+              signer: tx.signer,
               voteID: "",
               txID: tx.txid,
               status: "reverted",
             });
           } else {
             this.votes.push({
-              authAddr: tx.signer,
+              signer: tx.signer,
               voteID: receipt.outputs[0].events[1].topics[1],
               txID: tx.txid,
               status: "success",
