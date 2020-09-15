@@ -1,6 +1,7 @@
 <template>
-  <div class="list-vote">
-    <b-form-group
+  <div class="border rounded d-flex m-2 p-2 flex-column">
+    <p class="text-left font-weight-bold m-2">List all the votes created by: </p>
+    <b-form-group class="m-2"
       id="auth-address"
       label="Enter authority account address"
       label-for="input-1"
@@ -9,23 +10,18 @@
       <b-form-input id="input-1" v-model="address" @keyup.enter="getVoteIDs()" :state="state" trim></b-form-input>
     </b-form-group>
 
-    <b-container>
+    <b-container class="m-2" fluid>
       <b-row>
-        <b-col sm="2">Index</b-col>
-        <b-col sm="9">Vote ID</b-col>
+        <b-col sm="3">Index</b-col>
+        <b-col sm="7">Vote ID</b-col>
       </b-row>
       <b-row v-for="(id, index) in voteIDs" :key="id">
-        <b-col sm="2">
+        <b-col sm="3">
           <code>{{ index }}</code>:
         </b-col>
-        <b-col sm="9">{{id}}</b-col>
+        <b-col sm="7">{{id}}</b-col>
       </b-row>
     </b-container>
-
-    <!-- <b-form-input v-model="address" @keyup.enter="getVoteIDs()"></b-form-input> -->
-    <!-- <ul>
-        <li v-for="(id, index) in voteIDs" :key="id">VoteID {{index+1}}: {{id}}</li>
-    </ul>-->
   </div>
 </template>
 
@@ -56,17 +52,7 @@ export default class ListVotes extends Vue {
   // }
 
   get state() {
-    return isAddress(this.address) ? true : false;
-  }
-
-  private lpad(hexStr: string, totalLen: number): string {
-    const len = hexStr.length - 2; // hex string assumed to begin with '0x'
-
-    if (len >= totalLen) {
-      return hexStr;
-    }
-
-    return "0x" + "0".repeat(totalLen - len) + hexStr.slice(2);
+    return isAddress(this.address);
   }
 
   private async getVoteIDs() {
@@ -100,7 +86,7 @@ export default class ListVotes extends Vue {
         }
         this.voteIDs.push(out.data);
       } catch (e) {
-        alert(this.voteIDs.length + " " + e);
+        alert(e);
         return;
       }
     }
