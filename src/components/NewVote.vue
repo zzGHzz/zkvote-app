@@ -43,7 +43,7 @@ import { encodeABI } from "myvetools/dist/connexUtils";
 import { abiVoteCreator, addrVoteCreator, shortHex } from "../common";
 
 @Component
-export default class ListVotes extends Vue {
+export default class NewVote extends Vue {
   private auths: {
     address: string;
     unconfirmed_txids: string[];
