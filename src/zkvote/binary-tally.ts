@@ -1,6 +1,6 @@
 import BN from 'bn.js'
 
-import { ECP, g, inv, toHex } from './ec'
+import { ECP, g, inv, toHex, point } from './ec'
 import { isValidPower, pre } from './utils'
 import { Ballot, verifyBallot } from './binary-ballot'
 import { Proof, prove } from './zkp-fiat-shamir'
@@ -41,6 +41,8 @@ export class Tally {
         this.validSet = new Set()
         this.invalidSet = new Set()
         this.invalids = []
+        this.H = point(new BN(0), new BN(0))
+        this.Y = point(new BN(0), new BN(0))
     }
 
     count(b: Ballot) {
@@ -55,7 +57,7 @@ export class Tally {
         }
 
         if (verifyBallot(b)) {
-            if (typeof this.H === 'undefined') {
+            if (this.H.getX().isZero()) {
                 this.H = b.h
                 this.Y = b.y
             } else {
@@ -71,7 +73,7 @@ export class Tally {
     }
 
     getRes(): Res {
-        if (typeof this.H === 'undefined') {
+        if (this.H.getX().isZero()) {
             throw new Error('No valid ballot counted')
         }
 
