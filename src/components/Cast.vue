@@ -128,9 +128,7 @@ export default class Cast extends Vue {
     }
 
     this.ifCheckedVote = true;
-    console.log("set checked = true");
-
-    console.log(this.voteID);
+    console.log("set ifCheckVote = true");
 
     // Get the auth public key
     out = await contractCall(
@@ -205,6 +203,7 @@ export default class Cast extends Vue {
               ballotHash: "N/A",
             });
           } else {
+            console.log(`ballot hash: ${receipt.outputs[0].events[0].data}`);
             this.casted.push({
               signer: tx.signer,
               ballotHash: receipt.outputs[0].events[0].data,
