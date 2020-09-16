@@ -78,6 +78,8 @@ export default class Cast extends Vue {
     ballotHash: string;
   }[] = [];
 
+  private gas = 350000;
+
   get state() {
     return isHex(this.voteID) && this.voteID.length == 66;
   }
@@ -172,7 +174,7 @@ export default class Cast extends Vue {
     const b = compressBallot(ballot);
 
     const signingService = connex.vendor.sign("tx");
-    signingService.gas(500000).signer(this.signer);
+    signingService.gas(this.gas).signer(this.signer);
     const abi = getABI(abiVotingContract, "cast", "function");
     const data = encodeABI(abi, this.voteID, b.h, b.y, b.zkp, b.prefix);
     try {

@@ -42,6 +42,8 @@ export default class NewVote extends Vue {
     status: "success" | "reverted";
   }[] = [];
 
+  private gas = 4000000;
+
   private shortHex(h: string): string {
     if (h.length <= 10) {
       return h;
@@ -51,7 +53,7 @@ export default class NewVote extends Vue {
 
   private async newVote() {
     const signingService = connex.vendor.sign("tx");
-    signingService.gas(5000000);
+    signingService.gas(this.gas);
     const abi = getABI(abiVoteCreator, "newBinaryVote", "function");
     const data = encodeABI(abi);
     try {
