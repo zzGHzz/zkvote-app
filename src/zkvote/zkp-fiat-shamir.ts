@@ -1,5 +1,5 @@
 import BN from 'bn.js'
-import hash = require('hash.js')
+var hash = require('hash.js')
 
 import { ECP, n } from './ec'
 import { randPower, isValidPower } from './utils'
