@@ -56,7 +56,6 @@ export default class ListBallots extends Vue {
     status: number; // 0-unverified, 1-verfied/true, 2-verified/false
   }[] = [];
 
-  private abiVoteAddr = getABI(abiVotingContract, "voteAddr", "function");
   private statusTexts = ["Unverified", "Valid", "Invalid"];
 
   get state() {
