@@ -1,6 +1,6 @@
 <template>
   <div class="border rounded d-flex m-2 p-2 flex-column">
-    <h3 class="text-left m-2">List all the ballots in</h3>
+    <h3 class="text-left m-2">List all the ballots</h3>
     <b-input-group class="m-2" prepend="Vote ID">
       <b-form-input v-model="voteID" :state="state" :disabled="ifCheckedVote"></b-form-input>
       <b-button
