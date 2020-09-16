@@ -5,17 +5,17 @@
     <h1 v-if="!isTestNet">VeChainThor TestNet Required</h1>
     <h1 v-if="isTestNet">ZKVote APP</h1>
     <NewVote v-if="isTestNet"/>
+    <AuthorityPanel v-if="isTestNet" />
     <Cast v-if="isTestNet"/>
     <ListBallots v-if="isTestNet"/>
     <ListVotes v-if="isTestNet"/>
-    <!-- <AuthorityPanel v-if="isTestNet" /> -->
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 // import HelloWorld from "./components/HelloWorld.vue";
-// import AuthorityPanel from "./components/AuthorityPanel.vue";
+import AuthorityPanel from "./components/AuthorityPanel.vue";
 import NewVote from "./components/NewVote.vue"
 import Cast from "@/components/Cast.vue"
 import ListVotes from "./components/ListVotes.vue";
@@ -29,6 +29,7 @@ import "@vechain/connex";
     ListBallots,
     NewVote,
     Cast,
+    AuthorityPanel,
   },
 })
 export default class App extends Vue {
