@@ -3,7 +3,11 @@
     <h3 class="text-left font-weight-bold m-2">Cast a ballot</h3>
     <b-input-group class="m-2" id="vote-id" prepend="VoteID">
       <b-form-input id="input-1" v-model="voteID" :state="state" :disabled="ifCheckedVote" trim></b-form-input>
-      <b-button class="mr-3" @click="check">{{ !ifCheckedVote ? "Check & Lock" : "UnLock" }}</b-button>
+      <b-button
+        class="mr-3"
+        :disabled="!state"
+        @click="check"
+      >{{ !ifCheckedVote ? "Check & Lock" : "UnLock" }}</b-button>
     </b-input-group>
 
     <b-button
@@ -85,6 +89,7 @@ export default class Cast extends Vue {
     return h.slice(0, 6) + "..." + h.slice(h.length - 4);
   }
 
+  // Users have to commit to using a certain account before casting
   public async select() {
     const signSvc = connex.vendor.sign("cert");
     let result: Connex.Vendor.CertResponse;
@@ -116,19 +121,19 @@ export default class Cast extends Vue {
       return;
     }
 
+    // Check the existance of voteID
     let out = await contractCall(
       connex,
       addrVotingContract,
       getABI(abiVotingContract, "voteAddr", "function"),
       this.voteID
     );
-    if (out.data === "0x") {
+    if (parseInt(out.data.slice(2), 16) == 0) {
       alert("VoteID does not exist");
       return;
     }
 
     this.ifCheckedVote = true;
-    console.log("set ifCheckVote = true");
 
     // Get the auth public key
     out = await contractCall(
@@ -166,8 +171,6 @@ export default class Cast extends Vue {
     });
     const b = compressBallot(ballot);
 
-    console.log(b);
-
     const signingService = connex.vendor.sign("tx");
     signingService.gas(500000).signer(this.signer);
     const abi = getABI(abiVotingContract, "cast", "function");
@@ -181,7 +184,9 @@ export default class Cast extends Vue {
         },
       ]);
       this.txs.add(resp);
-      console.log(`add ${resp.txid}`);
+
+      console.log(`Cast add to the unconfirmed tx list: 
+  txid: ${resp.txid}`);
     } catch (e) {
       alert(e);
     }
@@ -194,7 +199,11 @@ export default class Cast extends Vue {
         const receipt = await connex.thor.transaction(tx.txid).getReceipt();
         if (receipt) {
           this.txs.delete(tx);
-          console.log(`delete ${tx.txid}`);
+
+          console.log(`Cast remove from the unconfirmed tx list:
+  signer: ${tx.signer}
+  txid: ${tx.txid}`);
+
           if (receipt.reverted) {
             this.casted.push({
               signer: tx.signer,
@@ -202,14 +211,22 @@ export default class Cast extends Vue {
               status: "reverted",
               ballotHash: "N/A",
             });
+
+            console.log(`Cast tx reverted:
+  signer: ${tx.signer}
+  txid: ${tx.txid}`);
           } else {
-            console.log(`ballot hash: ${receipt.outputs[0].events[0].data}`);
             this.casted.push({
               signer: tx.signer,
               ballotHash: receipt.outputs[0].events[0].data,
               txID: tx.txid,
               status: "success",
             });
+
+            console.log(`Cast tx success:
+  signer: ${tx.signer}
+  txid: ${tx.txid}
+  hash: ${receipt.outputs[0].events[0].data}`);
           }
         }
       }
@@ -218,3 +235,6 @@ export default class Cast extends Vue {
   }
 }
 </script>
+
+<style>
+</style>
