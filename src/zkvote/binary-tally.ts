@@ -137,7 +137,7 @@ export function verifyTallyRes(r: Res): boolean {
     return true
 }
 
-type ResForTally = {
+export type ResForTally = {
     V: number,
     X: string,
     Y: string,
