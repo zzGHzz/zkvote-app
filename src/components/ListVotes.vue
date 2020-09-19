@@ -51,7 +51,6 @@ export default class ListVotes extends Vue {
   }
 
   private async getVoteIDs() {
-    this.voteIDs = [];
     if (!isAddress(this.address)) {
       console.log("Invalid address: " + this.address);
       if (this.nVote > 0) {
