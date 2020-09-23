@@ -157,7 +157,7 @@ export default class ListBallots extends Vue {
     let out = await contractCall(
       connex,
       addrVotingContract,
-      getABI(abiVotingContract, "voteAddr", "function"),
+      getABI(abiVotingContract, "voteAuth", "function"),
       this.voteID
     );
     if (parseInt(out.data.slice(2), 16) == 0) {

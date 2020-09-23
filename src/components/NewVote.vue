@@ -25,8 +25,10 @@ import { Component, Vue } from "vue-property-decorator";
 import { getABI } from "myvetools/dist/utils";
 import { encodeABI } from "myvetools/dist/connexUtils";
 import {
-  abiVoteCreator,
-  addrVoteCreator,
+  // abiVoteCreator,
+  // addrVoteCreator,
+  // abiVotingContract,
+  // addrVotingContract,
   abiVotingContract,
   addrVotingContract,
 } from "../common";
@@ -42,7 +44,7 @@ export default class NewVote extends Vue {
     status: "success" | "reverted";
   }[] = [];
 
-  private gas = 2000000;
+  private gas = 150000;
 
   private shortHex(h: string): string {
     if (h.length <= 10) {
@@ -54,12 +56,12 @@ export default class NewVote extends Vue {
   private async newVote() {
     const signingService = connex.vendor.sign("tx");
     signingService.gas(this.gas);
-    const abi = getABI(abiVoteCreator, "newBinaryVote", "function");
+    const abi = getABI(abiVotingContract, "newBinaryVote", "function");
     const data = encodeABI(abi);
     try {
       const resp = await signingService.request([
         {
-          to: addrVoteCreator,
+          to: addrVotingContract,
           value: "0x0",
           data: data,
         },
@@ -87,7 +89,7 @@ export default class NewVote extends Vue {
           } else {
             this.votes.push({
               signer: tx.signer,
-              voteID: receipt.outputs[0].events[1].topics[1],
+              voteID: receipt.outputs[0].events[0].topics[1],
               txID: tx.txid,
               status: "success",
             });

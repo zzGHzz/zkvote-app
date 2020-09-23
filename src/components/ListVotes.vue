@@ -35,17 +35,6 @@ export default class ListVotes extends Vue {
   private nVote: number = 0;
   private abiVoterID = getABI(abiVotingContract, "voteID", "function");
 
-  // get invalidFeedback() {
-  //   if (this.address === "") {
-  //     return "Emptyp address";
-  //   }
-  //   if (!isAddress(this.address)) {
-  //     return "Invalid account address";
-  //   }
-
-  //   return "";
-  // }
-
   get state() {
     return isAddress(this.address);
   }
@@ -75,7 +64,7 @@ export default class ListVotes extends Vue {
           this.address,
           this.voteIDs.length
         );
-        if (out.data === "0x") {
+        if (out.data === "0x" + "0".repeat(64)) {
           return;
         }
         this.voteIDs.push(out.data);
