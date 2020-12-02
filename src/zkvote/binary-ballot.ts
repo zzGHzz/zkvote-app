@@ -5,121 +5,132 @@ import { ECP, g, toHex, compress, uncompress } from './ec'
 import { toHex as toHexBN } from './utils'
 
 export type Ballot = {
-    h: ECP,
-    y: ECP,
-    proof: Proof
+	h: ECP,
+	y: ECP,
+	proof: Proof
 }
 
 export function generateBallot(params: { a: BN, gk: ECP, v: boolean, address: string }): Ballot {
-    const { a, gk, v, address } = params
+	const { a, gk, v, address } = params
 
-    const h = g.mul(a)
-    let y = gk.mul(a)
-    if (v) {
-        y = y.add(g)
-    }
-    const proof = prove({
-        address: address,
-        gk: gk,
-        a: a,
-        v: v
-    })
+	const h = g.mul(a)
+	let y = gk.mul(a)
+	if (v) {
+		y = y.add(g)
+	}
+	const proof = prove({
+		address: address,
+		gk: gk,
+		a: a,
+		v: v
+	})
 
-    return {
-        h: h,
-        y: y,
-        proof: proof
-    }
+	return {
+		h: h,
+		y: y,
+		proof: proof
+	}
+}
+
+export function getBallotContent(a: BN, gk: ECP, y: ECP): Boolean {
+	let w = gk.mul(a)
+	if (w.eq(y)) {
+		return false
+	} else if (w.add(g).eq(y)) {
+		return true
+	} else {
+		throw new Error("Invalid ballot")
+	}
 }
 
 export function verifyBallot(b: Ballot): boolean {
-    const { h, y, proof } = b
+	const { h, y, proof } = b
 
-    if (!h.validate() || !y.validate()) {
-        return false
-    }
+	if (!h.validate() || !y.validate()) {
+		return false
+	}
 
-    return verify(proof)
+	return verify(proof)
 }
 
 export type CompressedBallot = {
-    h: string,
-    y: string,
-    zkp: string[],
-    prefix: string
+	h: string,
+	y: string,
+	zkp: string[],
+	prefix: string
 }
 
 export function compressBallot(b: Ballot): CompressedBallot {
-    const { h, y, proof } = b
-    const { d1, r1, d2, r2, a1, b1, a2, b2 } = proof
+	const { h, y, proof } = b
+	const { d1, r1, d2, r2, a1, b1, a2, b2 } = proof
 
-    let prefix: string = '0x'
-    prefix += compress(h).pre
-    prefix += compress(y).pre
-    prefix += compress(a1).pre
-    prefix += compress(b1).pre
-    prefix += compress(a2).pre
-    prefix += compress(b2).pre
+	let prefix: string = '0x'
+	prefix += compress(h).pre
+	prefix += compress(y).pre
+	prefix += compress(a1).pre
+	prefix += compress(b1).pre
+	prefix += compress(a2).pre
+	prefix += compress(b2).pre
 
-    return {
-        h: toHex(h, 'x'),
-        y: toHex(y, 'x'),
-        zkp: [
-            '0x' + d1.toString(16, 32),
-            '0x' + r1.toString(16, 32),
-            '0x' + d2.toString(16, 32),
-            '0x' + r2.toString(16, 32),
-            toHex(a1, 'x'),
-            toHex(b1, 'x'),
-            toHex(a2, 'x'),
-            toHex(b2, 'x')
-        ],
-        prefix: prefix
-    }
+	return {
+		h: toHex(h, 'x'),
+		y: toHex(y, 'x'),
+		zkp: [
+			'0x' + d1.toString(16, 32),
+			'0x' + r1.toString(16, 32),
+			'0x' + d2.toString(16, 32),
+			'0x' + r2.toString(16, 32),
+			toHex(a1, 'x'),
+			toHex(b1, 'x'),
+			toHex(a2, 'x'),
+			toHex(b2, 'x')
+		],
+		prefix: prefix
+	}
 }
 
 export function uncompressBallot(b: CompressedBallot, address: string, gk: ECP): Ballot {
-    const { h, y, zkp, prefix } = b
-    let pre: ('02' | '03')[] = []
-    for (let i = 0; i < 6; i++) {
-        const off = (5 - i) * 2
-        const s = prefix.slice(prefix.length - 2 - off, prefix.length - off)
-        pre.push(s === '02' ? '02' : '03')
-    }
+	const { h, y, zkp, prefix } = b
+	let pre: ('02' | '03')[] = []
+	for (let i = 0; i < 6; i++) {
+		const off = (5 - i) * 2
+		const s = prefix.slice(prefix.length - 2 - off, prefix.length - off)
+		pre.push(s === '02' ? '02' : '03')
+	}
 
-    // const buff = new BN(prefix.slice(2), 16).toBuffer('be') 
-    // buff.forEach((v, i) => {
-    //     if (v == 2) {
-    //         pre[i] = '02'
-    //     } else {
-    //         pre[i] = '03'
-    //     }
-    // })
+	// const buff = new BN(prefix.slice(2), 16).toBuffer('be') 
+	// buff.forEach((v, i) => {
+	//     if (v == 2) {
+	//         pre[i] = '02'
+	//     } else {
+	//         pre[i] = '03'
+	//     }
+	// })
 
-    const uy = uncompress(y, pre[1])
-    const uh = uncompress(h, pre[0])
-    return {
-        h: uh,
-        y: uy,
-        proof: {
-            address: address,
-            gk: gk,
-            ga: uh,
-            y: uy,
-            d1: new BN(zkp[0].slice(2), 16),
-            r1: new BN(zkp[1].slice(2), 16),
-            d2: new BN(zkp[2].slice(2), 16),
-            r2: new BN(zkp[3].slice(2), 16),
-            a1: uncompress(zkp[4], pre[2]),
-            b1: uncompress(zkp[5], pre[3]),
-            a2: uncompress(zkp[6], pre[4]),
-            b2: uncompress(zkp[7], pre[5])
-        }
-    }
+	const uy = uncompress(y, pre[1])
+	const uh = uncompress(h, pre[0])
+	return {
+		h: uh,
+		y: uy,
+		proof: {
+			address: address,
+			gk: gk,
+			ga: uh,
+			y: uy,
+			d1: new BN(zkp[0].slice(2), 16),
+			r1: new BN(zkp[1].slice(2), 16),
+			d2: new BN(zkp[2].slice(2), 16),
+			r2: new BN(zkp[3].slice(2), 16),
+			a1: uncompress(zkp[4], pre[2]),
+			b1: uncompress(zkp[5], pre[3]),
+			a2: uncompress(zkp[6], pre[4]),
+			b2: uncompress(zkp[7], pre[5])
+		}
+	}
 }
 
 export function print(b: Ballot): string {
-    return `address: ${b.proof.address}
+	return `address: ${b.proof.address}
 hx: ${toHex(b.h, 'x')}
 hy: ${toHex(b.h, 'y')}
 yx: ${toHex(b.y, 'x')}
